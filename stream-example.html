@@ -1,42 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=320, initial-scale=1"/>
-	<title>jsmpeg streaming</title>
-	<style type="text/css">
-		body {
-			background: #333;
-			text-align: center;
-			margin-top: 10%;
-		}
-		#videoCanvas {
-			/* Always stretch the canvas to 640x480, regardless of its
-			internal size. */
-			width: 640px;
-			height: 480px;
-		}
-	</style>
+  <meta name="viewport" content="width=320, initial-scale=1"/>
+  <title>jsmpeg streaming</title>
+  <style type="text/css">
+    body {
+      background: #333;
+      text-align: center;
+      margin: 0;
+    }
+    #container {
+      position: relative;
+    }
+    #videoCanvas {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      top: 0;
+      left: 0;
+      margin: 0;
+    }
+    #overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+
+      /* Font Stuff */
+      font-size: 40em;
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+      opacity: 0.3;
+    }
+  </style>
 </head>
 <body>
-	<!-- The Canvas size specified here is the "initial" internal resolution. jsmpeg will
-		change this internal resolution to whatever the source provides. The size the
-		canvas is displayed on the website is dictated by the CSS style.
-	-->
-	<canvas id="videoCanvas" width="640" height="480">
-		<p>
-			Please use a browser that supports the Canvas Element, like
-			<a href="http://www.google.com/chrome">Chrome</a>,
-			<a href="http://www.mozilla.com/firefox/">Firefox</a>,
-			<a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
-		</p>
-	</canvas>
-	<script type="text/javascript" src="jsmpg.js"></script>
-	<script type="text/javascript">
-		// Setup the WebSocket connection and start the player
-		var client = new WebSocket( 'ws://example.com:8084/' );
+  <div id="container">
+    <!-- The Canvas size specified here is the "initial" internal resolution. jsmpeg will
+      change this internal resolution to whatever the source provides. The size the
+      canvas is displayed on the website is dictated by the CSS style.
+    -->
+    <canvas id="videoCanvas" width="640" height="480">
+      <p>
+        Please use a browser that supports the Canvas Element, like
+        <a href="http://www.google.com/chrome">Chrome</a>,
+        <a href="http://www.mozilla.com/firefox/">Firefox</a>,
+        <a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
+      </p>
+    </canvas>
+    <div id="overlay">5</div>
+  </div>
+  <script type="text/javascript" src="jsmpg.js"></script>
+  <script type="text/javascript">
+    // Setup the WebSocket connection and start the player
+    var client = new WebSocket( 'ws://localhost:8084/' );
 
-		var canvas = document.getElementById('videoCanvas');
-		var player = new jsmpeg(client, {canvas:canvas});
-	</script>
+    var canvas = document.getElementById('videoCanvas');
+    var player = new jsmpeg(client, {canvas:canvas});
+  </script>
 </body>
 </html>
