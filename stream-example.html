@@ -34,6 +34,35 @@
       opacity: 0.3;
     }
   </style>
+
+  <script type="text/javascript">
+    window.onload = function(){
+      ov = document.getElementById("overlay");
+      running = 0;
+
+      document.addEventListener("keydown", function(event) {
+        if (event.which == 32 && running != 1)
+          startPicSequence();
+      });
+    };
+
+    function startPicSequence() {
+      ov.innerHTML = 5;
+      //document.getElementById(overlay).innerHTML = 5;
+      setTimeout(decrementOverlay, 1000);
+    }
+
+    function decrementOverlay() {
+      //ov = document.getElementById("overlay");
+      if (ov.innerHTML == 1) {
+        alert("setting 1 second timer to take picture");
+      } else {
+        ov.innerHTML = ov.innerHTML - 1;
+        setTimeout(decrementOverlay, 1000);
+      }
+    }
+  </script>
+
 </head>
 <body>
   <div id="container">
@@ -49,7 +78,7 @@
         <a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
       </p>
     </canvas>
-    <div id="overlay">5</div>
+    <div id="overlay"></div>
   </div>
   <script type="text/javascript" src="jsmpg.js"></script>
   <script type="text/javascript">
