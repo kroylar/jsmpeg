@@ -12,6 +12,7 @@
     #container {
       position: relative;
     }
+
     #videoCanvas {
       width: 100%;
       height: 100%;
@@ -33,12 +34,29 @@
       font-family: Arial, Helvetica, sans-serif;
       opacity: 0.3;
     }
+    video {
+      -webkit-transform: scaleX(-1);
+      transform: scaleX(-1);
+      width: 100%;
+      height: 100%;
+      position: relative;
+      top: 0;
+      left: 0;
+      margin: 0;
+    }
   </style>
 
   <script type="text/javascript">
-    window.onload = function(){
+    window.onload = start;
+    
+    function start(){
       ov = document.getElementById("overlay");
       running = 0;
+      picnum = 0;
+
+      // set initial text
+      ov.innerHTML = "Press Space When Ready";
+      ov.style.fontSize = "10em";
 
       document.addEventListener("keydown", function(event) {
         if (event.which == 32 && running != 1)
@@ -46,21 +64,76 @@
       });
     };
 
+    var video = document.querySelector('video');
+
+    // connect to node server via websocket
+    var ws = new WebSocket('ws://localhost:8080/');
+
+
     function startPicSequence() {
-      ov.innerHTML = 5;
-      //document.getElementById(overlay).innerHTML = 5;
+      ov.style.fontSize = "40em";
+      ov.innerHTML = 10;
       setTimeout(decrementOverlay, 1000);
     }
 
     function decrementOverlay() {
-      //ov = document.getElementById("overlay");
       if (ov.innerHTML == 1) {
-        alert("setting 1 second timer to take picture");
+        //alert("setting 1 second timer to take picture");
+        setTimeout(takePic, 200); // need a shorter time because it takes some time for imagesnap to actually take the picture
       } else {
         ov.innerHTML = ov.innerHTML - 1;
         setTimeout(decrementOverlay, 1000);
       }
     }
+
+    function takePic() {
+      ov.innerHTML = '';
+      ws.send("Take Photo");
+      picnum = picnum + 1;
+      video.pause();
+      ov.style.fontSize = "20em";
+      ov.innerHTML = "Picture " + picnum +"/3";
+      if (picnum < 3)
+        setTimeout(pic2, 3000);
+      else
+        setTimeout(finish, 3000);
+    }
+
+    function pic2() {
+      video.play()
+      ov.style.fontSize = "40em";
+      ov.innerHTML = 5;
+      setTimeout(decrementOverlay, 1000);
+    }
+
+    function finish() {
+      video.play();
+      ov.style.fontSize = "20em";
+      ov.innerHTML = "Thank You!";
+      setTimeout(start, 5000);
+    }
+
+    /*
+    MediaStreamTrack.getSources(function(sourceInfos) {
+      var audioSource = null;
+      var videoSource = null;
+
+      for (var i = 0; i != sourceInfos.length; ++i) {
+        var sourceInfo = sourceInfos[i];
+        if (sourceInfo.kind === 'audio') {
+          console.log(sourceInfo.id, sourceInfo.label || 'microphone');
+
+          audioSource = sourceInfo.id;
+        } else if (sourceInfo.kind === 'video') {
+          console.log(sourceInfo.id, sourceInfo.label || 'camera');
+
+          videoSource = sourceInfo.id;
+        } else {
+          console.log('Some other kind of source: ', sourceInfo);
+        }
+      }
+    });
+    */
   </script>
 
 </head>
@@ -70,16 +143,68 @@
       change this internal resolution to whatever the source provides. The size the
       canvas is displayed on the website is dictated by the CSS style.
     -->
-    <canvas id="videoCanvas" width="640" height="480">
+<!--    <canvas id="videoCanvas" width="640" height="480">
       <p>
         Please use a browser that supports the Canvas Element, like
         <a href="http://www.google.com/chrome">Chrome</a>,
         <a href="http://www.mozilla.com/firefox/">Firefox</a>,
         <a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
       </p>
-    </canvas>
+    </canvas>-->
+    <video autoplay></video>
+
     <div id="overlay"></div>
   </div>
+  <script>
+  /*
+    console.log("Enumerating media devices");
+
+    navigator.mediaDevices.enumerateDevices()
+    .then(gotDevices)
+    .catch(enErrorCallback);
+
+    function gotDevices(devices) {
+      devices.forEach(function(device) {
+        console.log(device.kind + ": " + device.label + " id= " + device.deviceId);
+      });
+    }
+    
+    function enErrorCallback(err) {
+      console.log(err.name + ": " + err.message);
+    }
+*/
+    var errorCallback = function(e) {
+      console.log("Rejected: ", e);
+    };
+
+    navigator.getUserMedia = navigator.getUserMedia ||
+                              navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia ||
+                              navigator.msGetUserMedia;
+
+    var video = document.querySelector('video');
+    
+    //var videoid = "0a9acc68116e5ab01ee19f1540317b9729c044314197331157aec87a807f3f4b";
+    var videoid = "d19ca378ed7491ca6dd6a9121b0fee9af693a263a9bf7b31ea48a7417362e75f";
+
+    var hdConstraints = {
+      video: {
+        optional: [{sourceId: videoid }]
+      }
+    };
+
+    function successCallback(stream) {
+      video.src = window.URL.createObjectURL(stream);
+    };
+
+    if (navigator.getUserMedia) {
+      navigator.getUserMedia(hdConstraints, successCallback, errorCallback);
+    } else {
+      video.src = 'file:///Users/klarsen/Movies/Solo/GOPR0669.m4v';
+    }
+
+  </script>
+  <!--
   <script type="text/javascript" src="jsmpg.js"></script>
   <script type="text/javascript">
     // Setup the WebSocket connection and start the player
@@ -88,5 +213,6 @@
     var canvas = document.getElementById('videoCanvas');
     var player = new jsmpeg(client, {canvas:canvas});
   </script>
+  -->
 </body>
 </html>
